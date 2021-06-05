@@ -20,16 +20,16 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 mongoose
-  .connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-  })
-  .then(() => console.log('MongoDB connected!'))
-  .catch(err => {
-    throw err;
-  });
+	.connect(MONGO_URI, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+		useCreateIndex: true,
+		useFindAndModify: false,
+	})
+	.then(() => console.log('MongoDB connected!'))
+	.catch(err => {
+		throw err;
+	});
 
 // Use routes
 app.use('/api/user', userRoutes);
