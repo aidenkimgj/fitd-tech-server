@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'core';
+import cors from 'cors';
 import config from './config/index';
 import mongoose from 'mongoose';
 import hpp from 'hpp';
@@ -9,7 +9,7 @@ import path from 'path';
 
 // Routes
 import userRoutes from './routes/api/user.js';
-import contentRoutes from './routes/api/content.js';
+// import contentRoutes from './routes/api/content.js';
 
 const app = express();
 const { MONGO_URI } = config;
@@ -20,16 +20,16 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 mongoose
-	.connect(MONGO_URI, {
-		useNewUrlParser: true,
-		useUnifiedTopology: true,
-		useCreateIndex: true,
-		useFindAndModify: false,
-	})
-	.then(() => console.log('MongoDB connected!'))
-	.catch(err => {
-		throw err;
-	});
+  .connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+  })
+  .then(() => console.log('MongoDB connected!'))
+  .catch(err => {
+    throw err;
+  });
 
 // Use routes
 app.use('/api/user', userRoutes);
