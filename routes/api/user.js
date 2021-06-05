@@ -1,5 +1,5 @@
 import express from 'express';
-import async from 'async';
+// import async from 'async';
 import auth from '../../middleware/auth';
 
 // Model
@@ -31,6 +31,7 @@ router.post('/register', (req, res) => {
   const user = new User(req.body);
 
   user.save((err, doc) => {
+    console.log(err)
     if (err) return res.json({ success: false, err });
     return res.status(200).json({
       success: true,
