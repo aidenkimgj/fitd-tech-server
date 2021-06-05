@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 
 const saltRounds = 10;
 
-const userSchema = mongoose.Schema({
+const userSchema = new mongoose.Schema({
   name: {
     type: String,
     maxlength: 50,
@@ -42,10 +42,39 @@ const userSchema = mongoose.Schema({
   tokenExp: {
     type: Number,
   },
+  social: {
+    google: {
+      id: String,
+      accessToken: String,
+    },
+  },
   recentlyViewed: {
     type: Array,
     default: [],
   },
+  createAt: {
+    type: Date,
+    default: moment().format('MM-DD-YYYY hh:mm:ss'),
+  },
+  comments: [
+    // For delete with a comment which it locates underneath the post
+    {
+      post_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'post',
+      },
+      comment_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'comment',
+      },
+    },
+  ],
+  posts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'post',
+    },
+  ],
 });
 
 userSchema.pre('save', function (next) {
@@ -67,14 +96,14 @@ userSchema.pre('save', function (next) {
   }
 });
 
-userSchema.methods.comparePassword = (plainPassword, cb) => {
+userSchema.methods.comparePassword = function (plainPassword, cb) {
   bcrypt.compare(plainPassword, this.password, (err, isMatch) => {
     if (err) return cb(err);
     cb(null, isMatch);
   });
 };
 
-userSchema.methods.generateToken = cb => {
+userSchema.methods.generateToken = function (cb) {
   let user = this;
   let token = jwt.sign(user._id.toHexString(), 'secret');
   let oneHour = moment().add(1, 'hour').valueOf();
@@ -87,7 +116,7 @@ userSchema.methods.generateToken = cb => {
   });
 };
 
-userSchema.statics.findByToken = (token, cb) => {
+userSchema.statics.findByToken = function (token, cb) {
   let user = this;
 
   jwt.verify(token, 'secret', (err, decode) => {
