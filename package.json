@@ -30,5 +30,15 @@
     "multer": "^1.4.2",
     "multer-s3": "^2.9.0",
     "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.14.3",
+    "@babel/core": "^7.14.3",
+    "@babel/node": "^7.14.2",
+    "@babel/plugin-transform-runtime": "^7.14.3",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.14.4",
+    "babel-watch": "^7.4.1",
+    "morgan": "^1.10.0"
   }
 }
