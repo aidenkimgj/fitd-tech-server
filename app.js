@@ -6,12 +6,14 @@ import hpp from 'hpp';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
+import cookieParser from 'cookie-parser';
 
 // Routes
 import userRoutes from './routes/api/user.js';
 // import contentRoutes from './routes/api/content.js';
 
 const app = express();
+app.use(cookieParser())
 const { MONGO_URI } = config;
 app.use(hpp());
 app.use(helmet({ contentSecurityPolicy: false }));

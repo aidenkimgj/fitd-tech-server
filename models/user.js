@@ -105,8 +105,8 @@ userSchema.methods.comparePassword = function (plainPassword, cb) {
 
 userSchema.methods.generateToken = function (cb) {
   let user = this;
-  let token = jwt.sign(user._id.toHexString(), 'secret');
-  let oneHour = moment().add(1, 'hour').valueOf();
+  let oneHour = (moment().add(1, 'hour').valueOf()) / 1000; //expired time 1 hour
+  let token = jwt.sign({ _id: user._id.toHexString(), exp: oneHour }, process.env.JWT_SECRET)
 
   user.tokenExp = oneHour;
   user.token = token;
@@ -119,9 +119,10 @@ userSchema.methods.generateToken = function (cb) {
 userSchema.statics.findByToken = function (token, cb) {
   let user = this;
 
-  jwt.verify(token, 'secret', (err, decode) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, decode) => {
     user.findOne({ _id: decode, token: token }, (err, user) => {
       if (err) return cb(err);
+      console.log(err)
       cb(null, user);
     });
   });

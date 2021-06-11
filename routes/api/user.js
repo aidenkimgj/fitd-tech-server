@@ -1,7 +1,7 @@
 import express from 'express';
 // import async from 'async';
 import auth from '../../middleware/auth';
-
+import { OAuth2Client } from 'google-auth-library';
 // Model
 import User from '../../models/user';
 // import Product from '../../models/product';
@@ -40,12 +40,14 @@ router.post('/register', (req, res) => {
 });
 
 router.post('/login', (req, res) => {
+  console.log(req.body.email)
   User.findOne({ email: req.body.email }, (err, user) => {
     if (!user)
       return res.json({
         loginSuccess: false,
         message: 'Auth failed, email not found',
       });
+
 
     user.comparePassword(req.body.password, (err, isMatch) => {
       if (!isMatch)
@@ -75,6 +77,66 @@ router.get('/logout', auth, (req, res) => {
     }
   );
 });
+
+router.post('/google', async (req, res) => {
+  // console.log(req.body)
+  const client = new OAuth2Client(process.env.CLIENT_ID)
+
+  const { token } = req.body
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: process.env.CLIENT_ID
+  });
+
+  console.log(ticket.getPayload())
+
+  const googleUserInfo = ticket.getPayload();
+
+  User.findOne({ email: googleUserInfo.email }, (err, user) => {
+    if (!user) {
+      const newUser = new User({
+        name: googleUserInfo.given_name,
+        email: googleUserInfo.email,
+        password: googleUserInfo.sub,
+        lastname: googleUserInfo.family_name,
+        image: googleUserInfo.picture
+      });
+
+      newUser.save((err, doc) => {
+        console.log(err)
+        if (err) return res.json({ success: false, err });
+        newUser.generateToken((err, user) => {
+          if (err) return res.status(400).send(err);
+          res.cookie("w_authExp", user.tokenExp);
+          res
+            .cookie("w_auth", user.token)
+            .status(200)
+            .json({
+              loginSuccess: true, userId: user._id
+            });
+        });
+
+      });
+    }
+    else {
+      user.comparePassword(googleUserInfo.sub, (err, isMatch) => {
+        if (!isMatch)
+          return res.json({ loginSuccess: false, message: "Wrong google sub" });
+
+        user.generateToken((err, user) => {
+          if (err) return res.status(400).send(err);
+          res.cookie("w_authExp", user.tokenExp);
+          res
+            .cookie("w_auth", user.token)
+            .status(200)
+            .json({
+              loginSuccess: true, userId: user._id
+            });
+        });
+      });
+    }
+  });
+})
 
 // router.post('/addToCart', auth, (req, res) => {
 //   //먼저  User Collection에 해당 유저의 정보를 가져오기
