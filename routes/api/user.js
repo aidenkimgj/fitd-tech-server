@@ -13,17 +13,26 @@ const router = express.Router();
 //=================================
 
 router.get('/auth', auth, (req, res) => {
-  res.status(200).json({
-    _id: req.user._id,
-    isAdmin: req.user.role === 0 ? false : true,
-    isAuth: true,
-    email: req.user.email,
-    name: req.user.name,
-    lastname: req.user.lastname,
-    role: req.user.role,
-    image: req.user.image,
-    cart: req.user.cart,
-    history: req.user.history,
+
+  //Token Refresh
+  req.user.generateToken((err, user) => {
+    if (err) return res.status(400).send(err);
+    res.cookie("w_authExp", user.tokenExp);
+    res
+      .cookie("w_auth", user.token)
+      .status(200)
+      .json({
+        _id: req.user._id,
+        isAdmin: req.user.role === 0 ? false : true,
+        isAuth: true,
+        email: req.user.email,
+        name: req.user.name,
+        lastname: req.user.lastname,
+        role: req.user.role,
+        image: req.user.image,
+        cart: req.user.cart,
+        history: req.user.history,
+      });
   });
 });
 
