@@ -13,7 +13,6 @@ const router = express.Router();
 //=================================
 
 router.get('/auth', auth, (req, res) => {
-
   //Token Refresh
   req.user.generateToken((err, user) => {
     if (err) return res.status(400).send(err);
@@ -87,6 +86,7 @@ router.get('/logout', auth, (req, res) => {
   );
 });
 
+//Google login 
 router.post('/google', async (req, res) => {
   // console.log(req.body)
   const client = new OAuth2Client(process.env.CLIENT_ID)
@@ -145,6 +145,83 @@ router.post('/google', async (req, res) => {
       });
     }
   });
+})
+
+router.post('/forgot', async (req, res) => {
+  User.findOne(
+    { email: req.body.email },
+    (err, user) => {
+      if (!user)
+        return res.json({
+          success: false,
+          message: "Email doesn't exist, Please try again."
+        });
+
+      const oAuth2Client = new google.auth.OAuth2(process.env.FORGOT_EMAIL_CLIENT_ID, process.env.FORGOT_EMAIL_SECRET, process.env.FORGOT_REDIRECT_URI)
+      oAuth2Client.setCredentials({ refresh_token: process.env.FORGOT_EMAIL_REFRESH_TOKEN })
+
+      // Generate Token to access the page to reset password
+      const token = crypto.randomBytes(20).toString('hex');
+
+      user.tokenExp = (moment().add(1, 'hour').valueOf()); //expired time 1 hour
+      user.token = token;
+
+      user.save(function (err, user) {
+        if (err) return res.status(400).json({ success: false, err })
+
+        async function sendMail() {
+          try {
+            const accessToken = await oAuth2Client.getAccessToken();
+            const transporter = nodemailer.createTransport({
+              service: 'gmail',
+              port: 465,
+              secure: true, // true for 465, false for other ports
+              auth: {
+                type: "OAuth2",
+                user: process.env.FORGOT_EMAIL_ID,
+                clientId: process.env.FORGOT_EMAIL_CLIENT_ID,
+                clientSecret: process.env.FORGOT_EMAIL_SECRET,
+                refreshToken: process.env.FORGOT_EMAIL_REFRESH_TOKEN,
+                accessToken: accessToken
+              }
+            });
+
+            const mailOptions = {
+              from: process.env.FORGOT_EMAIL_ID,
+              to: user.email,
+              subject: 'Password search authentication code transmission',
+              text: 'This is the authentication code to find the password!',
+              html:
+                `<p>Hello ${user.name}</p>` +
+                `<p>Please click the URL to reset your password.<p>` +
+                `<a href='${process.env.DOMAIN}/resetpw/${token}/${user.email}'>Click here to reset Your Password</a><br/>` +
+                `If you don't request this, please contac us` +
+                `<h4> Dean's Canada Shop</h4>`
+            };
+
+            const result = transporter.sendMail(mailOptions);
+            return result;
+          } catch {
+            res.status(400).json({ success: false, message: 'Fail to Send Mail' });
+          }
+        }
+        sendMail()
+          .then(result => {
+            if (result)
+              return res.json({ success: true });
+            else res.status(400).json({ success: false, message: 'Fail to Send Mail' });
+          })
+      })
+    })
+})
+
+router.post('/resetpw', auth, async (req, res) => {
+  let user = req.user;
+  user.password = req.body.password;
+  user.save(function (err, user) {
+    if (err) res.status(400).json({ error: true })
+    res.status(200).json({ success: true, user: user })
+  })
 })
 
 // router.post('/addToCart', auth, (req, res) => {
