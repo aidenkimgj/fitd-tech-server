@@ -85,8 +85,8 @@ router.get('/logout', auth, (req, res) => {
     }
   );
 });
-
-//Google login 
+//
+// Google login/ receive:token -> if new user, store to db and return user info or just return user info -> return userinfo -> Sangmean byungsin
 router.post('/google', async (req, res) => {
   // console.log(req.body)
   const client = new OAuth2Client(process.env.CLIENT_ID)
@@ -147,6 +147,7 @@ router.post('/google', async (req, res) => {
   });
 })
 
+// fogot/ receive: email, user want to find -> search the email and if it exists, return and send email with token (1hour validation)or not, send err with err message
 router.post('/forgot', async (req, res) => {
   User.findOne(
     { email: req.body.email },
@@ -215,6 +216,7 @@ router.post('/forgot', async (req, res) => {
     })
 })
 
+// Check token and then reset password / receive: token and email, send: success:true
 router.post('/resetpw', auth, async (req, res) => {
   let user = req.user;
   user.password = req.body.password;
