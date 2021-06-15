@@ -4,6 +4,10 @@ import auth from '../../middleware/auth';
 import { OAuth2Client } from 'google-auth-library';
 // Model
 import User from '../../models/user';
+import { google } from 'googleapis';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+import moment from 'moment';
 // import Product from '../../models/product';
 // import Payment from '../../models/payment';
 
@@ -101,12 +105,12 @@ router.get('/logout', auth, (req, res) => {
 // Trigger -> receive:token -> if new user, store to db and return user info or just return user info -> return userinfo
 router.post('/google', async (req, res) => {
   console.log(req.body)
-  const client = new OAuth2Client(process.env.CLIENT_ID)
+  const client = new OAuth2Client(process.env.LOGIN_OAUTH_CLIENT_ID)
   //verify Token
   const { token } = req.body
   const ticket = await client.verifyIdToken({
     idToken: token,
-    audience: process.env.CLIENT_ID
+    audience: process.env.LOGIN_OAUTH_CLIENT_ID
   });
 
   // get user info from google
@@ -175,10 +179,10 @@ router.post('/forgot', async (req, res) => {
         });
       //if email exists, request refreshToken to access google OAuth   
       const oAuth2Client = new google.auth.OAuth2(
-        process.env.FORGOT_EMAIL_CLIENT_ID,
-        process.env.FORGOT_EMAIL_SECRET,
-        process.env.FORGOT_REDIRECT_URI)
-      oAuth2Client.setCredentials({ refresh_token: process.env.FORGOT_EMAIL_REFRESH_TOKEN })
+        process.env.FORGOT_OAUTH_EMAIL_CLIENT_ID,
+        process.env.FORGOT_OAUTH_EMAIL_SECRET,
+        process.env.FORGOT_OAUTH_REDIRECT_URI)
+      oAuth2Client.setCredentials({ refresh_token: process.env.FORGOT_OAUTH_EMAIL_REFRESH_TOKEN })
 
       // Generate Token to access the page to reset password
       const token = crypto.randomBytes(20).toString('hex');
@@ -200,16 +204,16 @@ router.post('/forgot', async (req, res) => {
               secure: true, // true for 465, false for other ports
               auth: {
                 type: "OAuth2",
-                user: process.env.FORGOT_EMAIL_ID,
-                clientId: process.env.FORGOT_EMAIL_CLIENT_ID,
-                clientSecret: process.env.FORGOT_EMAIL_SECRET,
-                refreshToken: process.env.FORGOT_EMAIL_REFRESH_TOKEN,
+                user: process.env.WEBSITE_EMAIL_ADDRESS,
+                clientId: process.env.FORGOT_OAUTH_EMAIL_CLIENT_ID,
+                clientSecret: process.env.FORGOT_OAUTH_EMAIL_SECRET,
+                refreshToken: process.env.FORGOT_OAUTH_EMAIL_REFRESH_TOKEN,
                 accessToken: accessToken
               }
             });
             //Main contents
             const mailOptions = {
-              from: process.env.FORGOT_EMAIL_ID,
+              from: process.env.WEBSITE_EMAIL_ADDRESS,
               to: user.email,
               subject: 'Password search authentication code transmission',
               text: 'This is the authentication code to find the password!',
@@ -217,8 +221,8 @@ router.post('/forgot', async (req, res) => {
                 `<p>Hello ${user.name}</p>` +
                 `<p>Please click the URL to reset your password.<p>` +
                 `<a href='${process.env.DOMAIN}/resetpw/${token}/${user.email}'>Click here to reset Your Password</a><br/>` +
-                `If you don't request this, please contac us` +
-                `<h4> Dean's Canada Shop</h4>`
+                `If you don't request this, please contact us` +
+                `<h4> FITD Tech</h4>`
             };
 
             const result = transporter.sendMail(mailOptions);
