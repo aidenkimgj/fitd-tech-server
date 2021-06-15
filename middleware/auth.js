@@ -1,17 +1,27 @@
 import User from '../models/user';
 
+//=================================
+//             User
+//   Author: Donghyun(Dean) Kim
+// Role: User Authentication by using JWT or RandomToken(Forgot password link token)
+//=================================
+
 const auth = (req, res, next) => {
   console.log(req.headers)
-  //If front end server send cookies
+  //If jwt is in cookie
   // let token = req.cookies.w_auth;
   // let token_expire = req.cookies.w_authExp;
 
-  // or not
+  // or header
   // let token = req.headers.w_auth;
 
+  //Token from client side(it should be carried by cookie or header)
   let token;
+
+  // Token type - jwt; usual / random: a token for a link when user forgot a apssword
   let type;
 
+  //Distribute Token type
   if (req.body.token) {
     token = req.body.token;
     type = 'random'
@@ -21,11 +31,15 @@ const auth = (req, res, next) => {
     type = 'jwt';
   }
 
-
+  //Making Object to send it to user model
   const data = {
     token: token,
     type: type
   }
+
+  //Compare Token (Return: user object)
+  // jwt: authenticate token by using jwt.verify
+  //random: compare token with a token that is stored to the db
 
   User.findByToken(token, (err, user) => {
     if (err) throw err;

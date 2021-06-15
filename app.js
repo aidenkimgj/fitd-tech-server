@@ -12,6 +12,11 @@ import cookieParser from 'cookie-parser';
 import userRoutes from './routes/api/user.js';
 // import contentRoutes from './routes/api/content.js';
 
+//=================================
+//            App
+//   Author: Donghyun(Dean) Kim
+//=================================
+
 const app = express();
 app.use(cookieParser())
 const { MONGO_URI } = config;
@@ -21,6 +26,7 @@ app.use(cors({ origin: true, credentials: true, preFlightContinue: true }));
 app.use(morgan('dev'));
 app.use(express.json());
 
+//Connect MongoDB
 mongoose
   .connect(MONGO_URI, {
     useNewUrlParser: true,
