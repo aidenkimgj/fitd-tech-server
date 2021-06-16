@@ -41,7 +41,7 @@ const auth = (req, res, next) => {
   // jwt: authenticate token by using jwt.verify
   //random: compare token with a token that is stored to the db
 
-  User.findByToken(token, (err, user) => {
+  User.findByToken(data, (err, user) => {
     if (err) throw err;
     if (!user)
       return res.json({
