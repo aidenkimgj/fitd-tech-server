@@ -125,7 +125,8 @@ router.post('/google', async (req, res) => {
         email: googleUserInfo.email,
         password: googleUserInfo.sub,
         lastname: googleUserInfo.family_name,
-        image: googleUserInfo.picture
+        image: googleUserInfo.picture,
+        oauth: true
       });
 
       newUser.save((err, doc) => {
@@ -177,6 +178,12 @@ router.post('/forgot', async (req, res) => {
           success: false,
           message: "Email doesn't exist, Please try again."
         });
+      if (user.oauth) {
+        return res.json({
+          success: false,
+          message: "This user is registered as a Google user, please contact Google OAuth team."
+        });
+      }
       //if email exists, request refreshToken to access google OAuth   
       const oAuth2Client = new google.auth.OAuth2(
         process.env.FORGOT_OAUTH_EMAIL_CLIENT_ID,

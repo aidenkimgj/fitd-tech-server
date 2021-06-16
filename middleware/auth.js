@@ -30,6 +30,10 @@ const auth = (req, res, next) => {
     token = req.cookies.w_auth;
     type = 'jwt';
   }
+  else return res.json({
+    isAuth: false,
+    error: true
+  })
 
   //Making Object to send it to user model
   const data = {
