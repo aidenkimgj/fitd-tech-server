@@ -2,7 +2,7 @@ import User from '../models/user';
 
 //=================================
 //             User
-//   Author: Donghyun(Dean) Kim
+// Author: Aiden Kim, Donghyun(Dean) Kim
 // Role: User Authentication by using JWT or RandomToken(Forgot password link token)
 //=================================
 

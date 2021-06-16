@@ -6,7 +6,7 @@ const saltRounds = 10;
 
 //=================================
 //         User Model
-//   Author: Donghyun(Dean) Kim
+// Author: Aiden Kim, Donghyun(Dean) Kim
 //=================================
 const userSchema = new mongoose.Schema({
   name: {

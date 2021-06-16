@@ -14,7 +14,7 @@ import userRoutes from './routes/api/user.js';
 
 //=================================
 //            App
-//   Author: Donghyun(Dean) Kim
+//Author: Aiden Kim, Donghyun(Dean) Kim
 //=================================
 
 const app = express();

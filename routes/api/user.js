@@ -14,7 +14,7 @@ import moment from 'moment';
 const router = express.Router();
 //=================================
 //             User
-//   Author: Donghyun(Dean) Kim
+// Author: Aiden Kim, Donghyun(Dean) Kim
 //=================================
 
 // Autenticate a token and then return user's info if it's valid
