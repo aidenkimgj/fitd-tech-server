@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema({
   //Google login user - true or not
   oauth: {
     type: Boolean,
-    default: false
+    default: false,
   },
   recentlyViewed: {
     type: Array,
@@ -62,20 +62,20 @@ const userSchema = new mongoose.Schema({
   comments: [
     // For delete with a comment which it locates underneath the post
     {
-      post_id: {
+      content_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'post',
+        ref: 'Content',
       },
       comment_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'comment',
+        ref: 'Comment',
       },
     },
   ],
-  posts: [
+  contents: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'post',
+      ref: 'Content',
     },
   ],
 });
@@ -85,7 +85,7 @@ const userSchema = new mongoose.Schema({
 //   Author: Donghyun(Dean) Kim
 //=================================
 
-// To check whether password is modeified or not, if password is chaged, password will be encrypted  
+// To check whether password is modeified or not, if password is chaged, password will be encrypted
 // Trigger -> check whether password was changed or not -> if it's modified encrypt and return next() or just return next()
 userSchema.pre('save', function (next) {
   let user = this;
@@ -115,13 +115,15 @@ userSchema.methods.comparePassword = function (plainPassword, cb) {
   });
 };
 
-
 //Generate Jeson Web Token (exp: 1hour) (Return: user info callback)
 // Trigger -> just generate jwt token and store to the DB -> reutrn call back with user info
 userSchema.methods.generateToken = function (cb) {
   let user = this;
-  let oneHour = (moment().add(1, 'hour').valueOf()) / 1000; //expired time 1 hour
-  let token = jwt.sign({ _id: user._id.toHexString(), exp: oneHour }, process.env.JWT_SECRET)
+  let oneHour = moment().add(1, 'hour').valueOf() / 1000; //expired time 1 hour
+  let token = jwt.sign(
+    { _id: user._id.toHexString(), exp: oneHour },
+    process.env.JWT_SECRET
+  );
 
   user.tokenExp = oneHour;
   user.token = token;
@@ -141,25 +143,24 @@ userSchema.statics.findByToken = function (data, cb) {
 
   if (type == 'jwt') {
     jwt.verify(token, process.env.JWT_SECRET, function (err, decode) {
-      user.findOne({ "_id": decode, "token": token }, function (err, user) {
+      user.findOne({ _id: decode, token: token }, function (err, user) {
         if (err) return cb(err);
         cb(null, user);
-      })
-    })
+      });
+    });
   } else if (type == 'random') {
-
-    user.findOne({ "token": token }, function (err, user) {
+    user.findOne({ token: token }, function (err, user) {
       if (err) return cb(err);
       if (user.tokenExp >= moment().valueOf()) {
-        cb(null, user)
+        cb(null, user);
+      } else {
+        cb(null, null);
       }
-      else {
-        cb(null, null)
-      }
-    })
+    });
+  } else {
+    cb(null, null);
   }
-  else { cb(null, null) }
-}
+};
 
 const User = mongoose.model('User', userSchema);
 
