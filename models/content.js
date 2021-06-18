@@ -1,7 +1,12 @@
 import moment from 'moment';
 import mongoose from 'mongoose';
 
-const contentSchema = mongoose.Schema({
+//========================================
+//         Content Model
+// Author: Aiden Kim, Donghyun(Dean) Kim
+//========================================
+
+const contentSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
