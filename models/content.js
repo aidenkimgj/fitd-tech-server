@@ -24,19 +24,6 @@ const contentSchema = new mongoose.Schema({
     type: String,
     default: [],
   },
-  sold: {
-    type: Number,
-    maxlength: 100,
-    default: 0,
-  },
-  sort: {
-    type: Number,
-    default: 1,
-  },
-  rating: {
-    type: Number,
-    default: 0,
-  },
   views: {
     type: Number,
     default: -2,
@@ -49,10 +36,10 @@ const contentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
   },
-  comments: [
+  reviews: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Comment',
+      ref: 'Review',
     },
   ],
   creator: {
