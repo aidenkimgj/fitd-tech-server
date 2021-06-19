@@ -59,16 +59,16 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: moment().format('MM-DD-YYYY hh:mm:ss'),
   },
-  comments: [
+  reviews: [
     // For delete with a comment which it locates underneath the post
     {
       content_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Content',
       },
-      comment_id: {
+      review_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comment',
+        ref: 'Review',
       },
     },
   ],
