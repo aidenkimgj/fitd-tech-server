@@ -259,5 +259,114 @@ router.post('/resetpw', auth, async (req, res) => {
   })
 })
 
+//Elevate user to coatch 
+//Receive: UserID, Return - updated user info
+router.post('/approve-coach', auth, async (req, res) => {
+  //Admin authenticate
+  let user = req.user;
+  if (user.role !== 2) res.status(400).json({ error: true, message: "Unauthorized" });
+  let _id = req.body._id
 
+  //Updte
+  User.findByIdAndUpdate(_id,
+    { $set: { role: 1 } },
+    { new: true },
+    function (err, user) {
+      if (err) return res.status(400).json({ error: true, message: "User doesn't exist." });
+      res.status(200).json({ success: true, user: user });
+    })
+
+})
+
+//Request elevation user to coatch (change the user's role to 3(pending request))
+//Return - success: true, new userinfo
+router.get('/request-coach', auth, async (req, res) => {
+  //Check you are user
+  let user = req.user;
+  if (user.role !== 0) return res.status(400).json({ error: true, message: "You are not just a user" });
+
+  //change the user's role
+  user.role = 3;
+  user.save(function (err, user) {
+    if (err) res.status(400).json({ error: true })
+    res.status(200).json({ success: true })
+  })
+})
+
+//Return user list to Admin
+//Receive - option: if(req.body.option == "all",
+//                  req.body.option == "general",
+//                  req.body.option == "coach", 
+//                  req.body.option == "pending")
+//Receive, skip(default:0) and limit(default:20) number // Return - user list by the option
+router.post('/userlist', async (req, res) => {
+  //Admin authenticate
+  // let user = req.user;
+  // if (user.role !== 2) res.status(400).json({ error: true, message: "Unauthorized" });
+  let option = req.body.option
+
+  //Return 20 users only
+  let limit = req.body.limit ? parseInt(req.body.limit) : 20;
+  let skip = req.body.skip ? parseInt(req.body.skip) : 0;
+
+  switch (option) {
+    case "all": {
+      const users = await User.find().lean();
+      if (!users) return res.status(400).json({ success: false, err })
+      return res.status(200).json({
+        success: true, users: users
+      })
+      //skipping and limitting
+      // .skip(skip)
+      // .limit(limit)
+      // .exec((err, users) => {
+      //   if (err) return res.status(400).json({ success: false, err })
+      //   return res.status(200).json({
+      //     success: true, users: users
+      //   })
+      // })
+      break;
+    }
+    case "general": {
+      const users = await User.find({ role: 1 }).lean();
+      if (!users) return res.status(400).json({ success: false, err })
+      return res.status(200).json({
+        success: true, users: users
+      })
+      // .skip(skip)
+      // .limit(limit)
+      // .exec((err, users) => {
+      //   if (err) return res.status(400).json({ success: false, err })
+      //   return res.status(200).json({
+      //     success: true, users: users
+      //   })
+      // })
+      break;
+    }
+    case "coach": {
+      const users = await User.find({ role: 2 }).lean();
+      if (!users) return res.status(400).json({ success: false, err })
+      return res.status(200).json({
+        success: true, users: users
+      })
+      // .skip(skip)
+      // .limit(limit)
+      // .exec((err, users) => {
+      //   if (err) return res.status(400).json({ success: false, err })
+      //   return res.status(200).json({
+      //     success: true, users: users
+      //   })
+      // })
+      break;
+    }
+    case "pending": {
+      const users = await User.find({ role: 3 }).lean()
+      if (!users) return res.status(400).json({ success: false, err })
+      return res.status(200).json({
+        success: true, users: users
+      })
+      break;
+    }
+  }
+})
 export default router;

@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     maxlength: 50,
   },
-  // role: 0 - General User, 1 - Coach, 2 - Admin
+  // role: 0 - General User, 1 - Coach, 2 - Admin, 3 - pending request to be a coach
   role: {
     type: Number,
     default: 0,
