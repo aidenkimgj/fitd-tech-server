@@ -60,9 +60,11 @@ router.post('/deleteimg', deleteImg, async (req, res) => {
 
 router.post('/', auth, uploadS3.none(), async (req, res, next) => {
   try {
-    const { title, description, price, fileUrl, creator, category } = req.body;
+    const { path, title, description, price, fileUrl, creator, category } =
+      req.body;
 
     const newContent = await Content.create({
+      path,
       title,
       description,
       price,
