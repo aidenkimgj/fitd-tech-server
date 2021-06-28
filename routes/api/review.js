@@ -19,7 +19,9 @@ import Review from '../../models/review';
  */
 router.get('/:path/reviews', async (req, res) => {
   try {
-    const review = await Content.findById(req.params.id).populate('reviews');
+    const review = await Content.findOne({ path: req.params.path }).populate(
+      'reviews'
+    );
 
     console.log(review, 'review load');
     res.json(review);
