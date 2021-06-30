@@ -9,8 +9,11 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 
 // Routes
-import userRoutes from './routes/api/user.js';
-// import contentRoutes from './routes/api/content.js';
+import userRoutes from './routes/api/user';
+import contentRoutes from './routes/api/content';
+import reviewRoutes from './routes/api/review';
+import searchRoutes from './routes/api/search';
+import categoryRoutes from './routes/api/category';
 
 //=================================
 //            App
@@ -18,7 +21,7 @@ import userRoutes from './routes/api/user.js';
 //=================================
 
 const app = express();
-app.use(cookieParser())
+app.use(cookieParser());
 const { MONGO_URI } = config;
 app.use(hpp());
 app.use(helmet({ contentSecurityPolicy: false }));
@@ -41,5 +44,9 @@ mongoose
 
 // Use routes
 app.use('/api/user', userRoutes);
+app.use('/api/content', contentRoutes);
+app.use('/api/review', reviewRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/category', categoryRoutes);
 
 export default app;
