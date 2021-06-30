@@ -10,9 +10,8 @@ import Review from '../../models/review';
 // Author: Aiden Kim, Donghyun(Dean) Kim
 //========================================
 
-// Comments route
 /*
- * @route     GET   api/post/:path/reviews
+ * @route     GET   api/review/:path/reviews
  * @desc      Get All reviews
  * @access    Public
  *
@@ -31,7 +30,7 @@ router.get('/:path/reviews', async (req, res) => {
 });
 
 /*
- * @route     POST   api/post/:path/review
+ * @route     POST   api/review/:path/review
  * @desc      Create a review
  * @access    Private
  *
@@ -69,3 +68,5 @@ router.post('/:path/review', async (req, res, next) => {
     next(e);
   }
 });
+
+export default router;
