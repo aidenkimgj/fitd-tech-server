@@ -4,9 +4,7 @@ import auth from '../../middleware/auth';
 import { OAuth2Client } from 'google-auth-library';
 // Model
 import User from '../../models/user';
-import { google } from 'googleapis';
-import nodemailer from 'nodemailer';
-import crypto from 'crypto';
+import NewCoach from '../../models/newCoach';
 import moment from 'moment';
 // import Product from '../../models/product';
 // import Payment from '../../models/payment';
@@ -32,8 +30,8 @@ router.get('/auth', auth, (req, res) => {
         isAdmin: req.user.role === 2 ? false : true,
         isAuth: true,
         email: req.user.email,
-        name: req.user.name,
-        lastname: req.user.lastname,
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
         role: req.user.role,
         image: req.user.image,
         cart: req.user.cart,
@@ -47,10 +45,10 @@ router.get('/auth', auth, (req, res) => {
 // Validation - mongo DB will return error by using model if it has some wroing validation
 // Trigger -> get user's info and then store it to the DB -> reutrn success:true
 router.post('/register', (req, res) => {
+  console.log('register: ', req.body)
   const user = new User(req.body);
 
   user.save((err, doc) => {
-    console.log(err)
     if (err) return res.json({ success: false, err });
     return res.status(200).json({
       success: true,
@@ -121,10 +119,10 @@ router.post('/google', async (req, res) => {
     //if user info doesn't exists
     if (!user) {
       const newUser = new User({
-        name: googleUserInfo.given_name,
+        firstName: googleUserInfo.given_name,
         email: googleUserInfo.email,
         password: googleUserInfo.sub,
-        lastname: googleUserInfo.family_name,
+        lastName: googleUserInfo.family_name,
         image: googleUserInfo.picture,
         oauth: true
       });
@@ -184,67 +182,19 @@ router.post('/forgot', async (req, res) => {
           message: "This user is registered as a Google user, please contact Google OAuth team."
         });
       }
-      //if email exists, request refreshToken to access google OAuth   
-      const oAuth2Client = new google.auth.OAuth2(
-        process.env.FORGOT_OAUTH_EMAIL_CLIENT_ID,
-        process.env.FORGOT_OAUTH_EMAIL_SECRET,
-        process.env.FORGOT_OAUTH_REDIRECT_URI)
-      oAuth2Client.setCredentials({ refresh_token: process.env.FORGOT_OAUTH_EMAIL_REFRESH_TOKEN })
 
-      // Generate Token to access the page to reset password
-      const token = crypto.randomBytes(20).toString('hex');
-
-      user.tokenExp = (moment().add(1, 'hour').valueOf()); //expired time 1 hour
-      user.token = token;
-
-      //store token to the DB
-      user.save(function (err, user) {
-        if (err) return res.status(400).json({ success: false, err })
-
-        async function sendMail() {
-          try {
-            //generate access token from google
-            const accessToken = await oAuth2Client.getAccessToken();
-            const transporter = nodemailer.createTransport({
-              service: 'gmail',
-              port: 465,
-              secure: true, // true for 465, false for other ports
-              auth: {
-                type: "OAuth2",
-                user: process.env.WEBSITE_EMAIL_ADDRESS,
-                clientId: process.env.FORGOT_OAUTH_EMAIL_CLIENT_ID,
-                clientSecret: process.env.FORGOT_OAUTH_EMAIL_SECRET,
-                refreshToken: process.env.FORGOT_OAUTH_EMAIL_REFRESH_TOKEN,
-                accessToken: accessToken
-              }
-            });
-            //Main contents
-            const mailOptions = {
-              from: process.env.WEBSITE_EMAIL_ADDRESS,
-              to: user.email,
-              subject: 'Password search authentication code transmission',
-              text: 'This is the authentication code to find the password!',
-              html:
-                `<p>Hello ${user.name}</p>` +
-                `<p>Please click the URL to reset your password.<p>` +
-                `<a href='${process.env.DOMAIN}/resetpw/${token}/${user.email}'>Click here to reset Your Password</a><br/>` +
-                `If you don't request this, please contact us` +
-                `<h4> FITD Tech</h4>`
-            };
-
-            const result = transporter.sendMail(mailOptions);
-            return result;
-          } catch {
-            res.status(400).json({ success: false, message: 'Fail to Send Mail' });
-          }
+      console.log('user: ', user)
+      //Send Email
+      user.sendEmail('forgot', (err, result, token) => {
+        user.tokenExp = (moment().add(1, 'hour').valueOf()); //expired time 1 hour
+        user.token = token;
+        user.save(function (err, user) {
+          if (err) return res.status(400).json({ success: false, err })
+        })
+        if (result) {
+          return res.json({ success: true });
         }
-        //Executution
-        sendMail()
-          .then(result => {
-            if (result)
-              return res.json({ success: true });
-            else res.status(400).json({ success: false, message: 'Fail to Send Mail' });
-          })
+        else res.status(400).json({ success: false, message: err.message });
       })
     })
 })
@@ -275,29 +225,52 @@ router.post('/approve-coach', auth, async (req, res) => {
       if (err) return res.status(400).json({ error: true, message: "User doesn't exist." });
       res.status(200).json({ success: true, user: user });
     })
-
 })
 
 //Request elevation user to coatch (change the user's role to 3(pending request))
 //Return - success: true, new userinfo
-router.get('/request-coach', auth, async (req, res) => {
+router.post('/request-coach', auth, async (req, res) => {
   //Check you are user
   let user = req.user;
   if (user.role !== 0) return res.status(400).json({ error: true, message: "You are not just a user" });
 
+  // //save coach appplication
+  req.body.user = user._id;
+
+  //Send a notification to a admin 
+  user.sendEmail('newCoach', (err, result, token) => {
+    if (err) return res.status(400).json({ success: false, message: 'Fail to send Email' });
+    const newCoach = new NewCoach(req.body);
+    newCoach.token = token;
+    newCoach.save((err, doc) => {
+      if (err) return res.status(400).json({ success: false, err })
+    })
+  })
+
   //change the user's role
   user.role = 3;
   user.save(function (err, user) {
-    if (err) res.status(400).json({ error: true })
+    if (err) return res.status(400).json({ error: true })
     res.status(200).json({ success: true })
   })
 })
 
+//Return a new coach application / Receive - token
+router.post('/getApplication', auth, async (req, res) => {
+  //Check Authorization
+  if (user.role !== 2) res.status(400).json({ error: true, message: "Unauthorized" });
+  const token = req.body.token;
+
+  NewCoach.findOne({ token: token }, (err, app) => {
+    if (err) return res.status(400).json({ success: false, err })
+    res.status(200).json({ success: true, app: app })
+  })
+})
 //Return user list to Admin
-//Receive - option: if(req.body.option == "all",
-//                  req.body.option == "general",
-//                  req.body.option == "coach", 
-//                  req.body.option == "pending")
+//Receive - option: if(option == "all",
+//                  option == "general",
+//                  option == "coach", 
+//                  option == "pending")
 //Receive, skip(default:0) and limit(default:20) number // Return - user list by the option
 router.post('/userlist', async (req, res) => {
   //Admin authenticate

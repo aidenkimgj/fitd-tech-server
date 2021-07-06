@@ -2,6 +2,10 @@ import mongoose from 'mongoose';
 import moment from 'moment';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { google } from 'googleapis';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+import { forgot, newCoach } from '../form/email.form'
 const saltRounds = 10;
 
 //=================================
@@ -9,7 +13,7 @@ const saltRounds = 10;
 // Author: Aiden Kim, Donghyun(Dean) Kim
 //=================================
 const userSchema = new mongoose.Schema({
-  name: {
+  firstName: {
     type: String,
     maxlength: 50,
   },
@@ -22,7 +26,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     minglength: 5,
   },
-  lastname: {
+  lastName: {
     type: String,
     maxlength: 50,
   },
@@ -161,6 +165,47 @@ userSchema.statics.findByToken = function (data, cb) {
     cb(null, null);
   }
 };
+
+userSchema.methods.sendEmail = async function (type, cb) {
+  let user = this;
+  //if email exists, request refreshToken to access google OAuth   
+  const oAuth2Client = new google.auth.OAuth2(
+    process.env.FORGOT_OAUTH_EMAIL_CLIENT_ID,
+    process.env.FORGOT_OAUTH_EMAIL_SECRET,
+    process.env.FORGOT_OAUTH_REDIRECT_URI)
+  oAuth2Client.setCredentials({ refresh_token: process.env.FORGOT_OAUTH_EMAIL_REFRESH_TOKEN })
+
+  // Generate Token to access the page to reset password
+  const token = crypto.randomBytes(20).toString('hex');
+
+  try {
+    //generate access token from google
+    const accessToken = await oAuth2Client.getAccessToken();
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      port: 465,
+      secure: true, // true for 465, false for other ports
+      auth: {
+        type: "OAuth2",
+        user: process.env.WEBSITE_EMAIL_ADDRESS,
+        clientId: process.env.FORGOT_OAUTH_EMAIL_CLIENT_ID,
+        clientSecret: process.env.FORGOT_OAUTH_EMAIL_SECRET,
+        refreshToken: process.env.FORGOT_OAUTH_EMAIL_REFRESH_TOKEN,
+        accessToken: accessToken
+      }
+    });
+    //Main contents
+    let mailOptions;
+    if (type === 'forgot')
+      mailOptions = forgot(user.firstName, token, user.email);
+    else if (type === 'newCoach')
+      mailOptions = newCoach(user.firstName, token, user.email);
+    const result = transporter.sendMail(mailOptions);
+    return cb(null, result, token);
+  } catch (err) {
+    return cb(err, null, null);
+  }
+}
 
 const User = mongoose.model('User', userSchema);
 

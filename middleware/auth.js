@@ -7,7 +7,6 @@ import User from '../models/user';
 //=================================
 
 const auth = (req, res, next) => {
-  console.log(req.headers)
   //If jwt is in cookie
   // let token = req.cookies.w_auth;
   // let token_expire = req.cookies.w_authExp;
@@ -20,7 +19,6 @@ const auth = (req, res, next) => {
 
   // Token type - jwt; usual / random: a token for a link when user forgot a apssword
   let type;
-
   //Distribute Token type
   if (req.body.token) {
     token = req.body.token;
