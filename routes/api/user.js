@@ -256,11 +256,10 @@ router.post('/request-coach', auth, async (req, res) => {
 })
 
 //Return a new coach application / Receive - token
-router.post('/getApplication', async (req, res) => {
+router.post('/getApplication', auth, async (req, res) => {
   //Check Authorization
-  // if (user.role !== 2) res.status(400).json({ error: true, message: "Unauthorized" });
+  if (user.role !== 2) res.status(400).json({ error: true, message: "Unauthorized" });
   const allApp = await NewCoach.find().lean();
-  // console.log(allApp)
   res.status(200).json({ success: true, app: allApp })
 })
 //Return user list to Admin
