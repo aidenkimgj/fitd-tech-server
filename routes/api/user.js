@@ -259,13 +259,9 @@ router.post('/request-coach', auth, async (req, res) => {
 router.post('/getApplication', async (req, res) => {
   //Check Authorization
   // if (user.role !== 2) res.status(400).json({ error: true, message: "Unauthorized" });
-  const token = req.body.token;
-  console.log(token)
-  NewCoach.findOne({ token: token }, (err, app) => {
-    if (err) return res.status(400).json({ success: false, err })
-    console.log(app)
-    res.status(200).json({ success: true, app: app })
-  }).lean();
+  const allApp = await NewCoach.find().lean();
+  // console.log(allApp)
+  res.status(200).json({ success: true, app: allApp })
 })
 //Return user list to Admin
 //Receive - option: if(option == "all",
