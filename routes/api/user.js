@@ -263,6 +263,7 @@ router.post('/getApplication', async (req, res) => {
   console.log(token)
   NewCoach.findOne({ token: token }, (err, app) => {
     if (err) return res.status(400).json({ success: false, err })
+    console.log(app)
     res.status(200).json({ success: true, app: app })
   }).lean();
 })
