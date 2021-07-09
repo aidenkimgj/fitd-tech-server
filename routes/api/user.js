@@ -263,16 +263,17 @@ router.post('/getApplication', auth, async (req, res) => {
   const allApp = await NewCoach.find().lean();
   res.status(200).json({ success: true, app: allApp })
 })
+
 //Return user list to Admin
 //Receive - option: if(option == "all",
 //                  option == "general",
 //                  option == "coach", 
 //                  option == "pending")
 //Receive, skip(default:0) and limit(default:20) number // Return - user list by the option
-router.post('/userlist', async (req, res) => {
+router.post('/userlist', auth, async (req, res) => {
   //Admin authenticate
-  // let user = req.user;
-  // if (user.role !== 2) res.status(400).json({ error: true, message: "Unauthorized" });
+  let user = req.user;
+  if (user.role !== 2) res.status(400).json({ error: true, message: "Unauthorized" });
   let option = req.body.option
 
   //Return 20 users only

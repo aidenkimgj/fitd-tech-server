@@ -27,6 +27,9 @@ const newCoachSchema = new mongoose.Schema({
 	linkedIn: {
 		type: String,
 	},
+	introOfCoach: {
+		type: String
+	},
 	coachStyle: {
 		type: String,
 	},
@@ -52,12 +55,6 @@ const newCoachSchema = new mongoose.Schema({
 	provideChecked: {
 		type: Array,
 		default: [],
-	},
-	expertiseAreaOther: {
-		type: String,
-	},
-	provideCheckedOther: {
-		type: String,
 	},
 	token: {
 		type: String,
