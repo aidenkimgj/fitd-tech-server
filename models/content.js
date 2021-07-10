@@ -7,16 +7,24 @@ import mongoose from 'mongoose';
 //========================================
 
 const contentSchema = new mongoose.Schema({
-  path: {
-    type: String,
-    required: true,
-  },
   title: {
     type: String,
     required: true,
     index: true,
   },
   description: {
+    type: String,
+    required: true,
+  },
+  detail: {
+    type: String,
+    required: true,
+  },
+  via: {
+    type: String,
+    required: true,
+  },
+  type: {
     type: String,
     required: true,
   },
