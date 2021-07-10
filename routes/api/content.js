@@ -77,13 +77,14 @@ router.get('/', async (req, res) => {
 
 router.post('/', auth, uploadS3.none(), async (req, res, next) => {
   try {
-    const { path, title, description, price, fileUrl, creator, category } =
-      req.body;
+    const { title, description, detail, via, type, price, category } = req.body;
 
     const newContent = await Content.create({
-      path,
       title,
       description,
+      detail,
+      via,
+      type,
       price,
       fileUrl,
       creator: req.user.id,
@@ -127,34 +128,35 @@ router.post('/', auth, uploadS3.none(), async (req, res, next) => {
         $push: { contents: newContent._id },
       });
     }
-    return res.redirect(`/api/content/${newContent.path}`);
+    res.json(newContent);
+    // return res.redirect(`/api/content/${newContent._id}`);
   } catch (e) {
     console.error(e);
   }
 });
 
-/*
- * @route     GET   api/content/:path
- * @desc      Get each content detail
- * @access    Public
- *
- */
+// /*
+//  * @route     GET   api/content/:path
+//  * @desc      Get each content detail
+//  * @access    Public
+//  *
+//  */
 
-router.get('/:path', async (req, res, next) => {
-  try {
-    const content = await Content.findOne(req.params.path)
-      .populate('creator', 'name') // first value is path and second value is select
-      .populate({ path: 'category', select: 'categoryName' });
-    // .exec();
-    content.views += 1;
-    content.save();
-    console.log(content);
-    res.json(content);
-  } catch (e) {
-    console.error(e);
-    next(e);
-  }
-});
+// router.get('/:path', async (req, res, next) => {
+//   try {
+//     const content = await Content.findOne(req.params.path)
+//       .populate('creator', 'name') // first value is path and second value is select
+//       .populate({ path: 'category', select: 'categoryName' });
+//     // .exec();
+//     content.views += 1;
+//     content.save();
+//     console.log(content);
+//     res.json(content);
+//   } catch (e) {
+//     console.error(e);
+//     next(e);
+//   }
+// });
 
 /*
  * @route    GET api/content/:path/edit
@@ -162,11 +164,11 @@ router.get('/:path', async (req, res, next) => {
  * @access   Private
  *
  */
-router.get('/:path/edit', auth, async (req, res, next) => {
+router.get('/:id/edit', auth, async (req, res, next) => {
   try {
-    const content = await Content.findOne(req.params.path).populate(
+    const content = await Content.findById(req.params.id).populate(
       'creator',
-      'name'
+      'firstName'
     );
     res.json(content);
   } catch (e) {
@@ -176,24 +178,26 @@ router.get('/:path/edit', auth, async (req, res, next) => {
 
 /*
  * @route    POST api/content/:path/edit
- * @desc     Edit Post
+ * @desc     Edit content
  * @access   Private
  *
  */
-router.post('/:path/edit', auth, async (req, res, next) => {
+router.post('/:id/edit', auth, async (req, res, next) => {
   console.log(req, 'api/content/:path/edit');
 
   const {
-    body: { path, title, description, price, fileUrl },
+    body: { id, title, description, detail, via, type, price, fileUrl },
   } = req;
 
   try {
-    const modified_content = await Content.findOneAndUpdate(
-      path,
+    const modified_content = await Content.findByIdAndUpdate(
+      id,
       {
-        path,
         title,
         description,
+        detail,
+        via,
+        type,
         price,
         fileUrl,
         date: moment().format('MM-DD-YYYY hh:mm:ss'),
@@ -201,7 +205,8 @@ router.post('/:path/edit', auth, async (req, res, next) => {
       { new: true }
     );
     console.log(modified_content, 'edit modified');
-    res.redirect(`/api/content/${modified_content.path}`);
+    res.json(modified_content);
+    // res.redirect(`/api/content/${modified_content.path}`);
   } catch (e) {
     console.error(e);
     next(e);
@@ -214,19 +219,18 @@ router.post('/:path/edit', auth, async (req, res, next) => {
  * @access   Private
  *
  */
-router.delete('/:path', auth, async (req, res) => {
-  const content = Content.findOne({ path: req.params.path });
-  await Content.deleteMany({ _id: content._id });
-  await Review.deleteMany({ content: content._id });
+router.delete('/:id', auth, async (req, res) => {
+  await Content.deleteMany({ _id: req.params.id });
+  await Review.deleteMany({ content: req.params.id });
   await User.findByIdAndUpdate(req.user.id, {
     $pull: {
-      contents: content._id,
-      reviews: { content_id: content._id },
+      contents: req.params.id,
+      reviews: { content_id: req.params.id },
     },
   });
   const CategoryUpdateResult = await Category.findOneAndUpdate(
-    { contents: content._id },
-    { $pull: { contents: content._id } },
+    { contents: req.params.id },
+    { $pull: { contents: req.params.id } },
     { new: true }
   );
 
