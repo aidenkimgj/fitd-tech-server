@@ -4,7 +4,8 @@ import moment from 'moment';
 import '@babel/polyfill';
 import { isNullOrUndefined } from 'util';
 import auth from '../../middleware/auth';
-import { uploadS3, deleteImg } from '../../middleware/aws';
+import { contentS3, deleteImg } from '../../middleware/aws';
+import imageUpload from '../../middleware/imageUpload';
 
 // Model
 import Content from '../../models/content';
@@ -25,10 +26,11 @@ import Review from '../../models/review';
  *
  */
 
-router.post('/image', uploadS3.array('upload', 5), async (req, res, next) => {
+router.post('/image', contentS3.single('upload'), async (req, res, next) => {
   try {
-    console.log(req.files.map(v => v.location));
-    res.json({ uploaded: true, url: req.files.map(v => v.location) });
+    // console.log(req.file.location, 's3응답');
+    console.log(req, '뭐지?');
+    res.json({ uploaded: true, url: req.uploadUrl });
   } catch (e) {
     console.error(e);
     res.json({ uploaded: false, url: null });
@@ -75,18 +77,28 @@ router.get('/', async (req, res) => {
  *
  */
 
-router.post('/', auth, uploadS3.none(), async (req, res, next) => {
+router.post('/', auth, imageUpload, async (req, res, next) => {
   try {
-    const { title, description, detail, via, type, price, category } = req.body;
+    const {
+      title,
+      description,
+      details,
+      viaSelected,
+      duration,
+      typeSelected,
+      contentPrice,
+      category,
+    } = req.body;
 
     const newContent = await Content.create({
       title,
       description,
-      detail,
-      via,
-      type,
-      price,
-      fileUrl,
+      detail: details.contents,
+      via: viaSelected,
+      type: typeSelected,
+      price: contentPrice,
+      fileUrl: req.locaiton,
+      duration,
       creator: req.user.id,
       date: moment().format('MM-DD-YYYY hh:mm:ss'),
     });
@@ -186,7 +198,17 @@ router.post('/:id/edit', auth, async (req, res, next) => {
   console.log(req, 'api/content/:path/edit');
 
   const {
-    body: { id, title, description, detail, via, type, price, fileUrl },
+    body: {
+      id,
+      title,
+      description,
+      details,
+      viaSelected,
+      duration,
+      typeSelected,
+      contentPrice,
+      category,
+    },
   } = req;
 
   try {
@@ -195,11 +217,12 @@ router.post('/:id/edit', auth, async (req, res, next) => {
       {
         title,
         description,
-        detail,
-        via,
-        type,
-        price,
-        fileUrl,
+        duration,
+        detail: details.contents,
+        via: viaSelected,
+        type: typeSelected,
+        price: contentPrice,
+        fileUrl: details.fileUrl,
         date: moment().format('MM-DD-YYYY hh:mm:ss'),
       },
       { new: true }
