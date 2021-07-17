@@ -4,7 +4,6 @@ import moment from 'moment';
 import '@babel/polyfill';
 import { isNullOrUndefined } from 'util';
 import auth from '../../middleware/auth';
-import { contentS3, deleteImg } from '../../middleware/aws';
 import imageUpload from '../../middleware/imageUpload';
 
 // Model
@@ -17,42 +16,6 @@ import Review from '../../models/review';
 //         Content Apis
 // Author: Aiden Kim, Donghyun(Dean) Kim
 //========================================
-
-/*
- *
- * @route   POST   api/content/image
- * @desc    upload image
- * @access  Private
- *
- */
-
-router.post('/image', contentS3.single('upload'), async (req, res, next) => {
-  try {
-    // console.log(req.file.location, 's3응답');
-    console.log(req, '뭐지?');
-    res.json({ uploaded: true, url: req.uploadUrl });
-  } catch (e) {
-    console.error(e);
-    res.json({ uploaded: false, url: null });
-  }
-});
-
-/*
- *
- * @route    POST   api/content/deleteimg
- * @desc     delete image in the aws S3
- * @access   Private
- *
- */
-
-router.post('/deleteimg', deleteImg, async (req, res) => {
-  try {
-    res.json({ deleted: true });
-  } catch (e) {
-    console.error(e);
-    res.json({ deleted: false });
-  }
-});
 
 /*
  * @route     GET   api/content/
@@ -97,7 +60,7 @@ router.post('/', auth, imageUpload, async (req, res, next) => {
       via: viaSelected,
       type: typeSelected,
       price: contentPrice,
-      fileUrl: req.locaiton,
+      fileUrl: req.location,
       duration,
       creator: req.user.id,
       date: moment().format('MM-DD-YYYY hh:mm:ss'),
