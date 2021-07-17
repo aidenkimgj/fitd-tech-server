@@ -5,7 +5,7 @@ const imageUpload = async (req, res, next) => {
   const AWS = require('aws-sdk');
 
   // Configure AWS with your access and secret key.
-  const { AWS_KEY, AWS_PRIVATE_KEY, S3_BUCKET } = process.env;
+  const { AWS_KEY, AWS_PRIVATE_KEY, S3_BUCKET1, S3_BUCKET2 } = process.env;
 
   // Configure AWS to use promise
   AWS.config.setPromisesDependency(require('bluebird'));
@@ -30,8 +30,10 @@ const imageUpload = async (req, res, next) => {
 
   const userId = 1;
 
+  const Bucket = req.body.title ? S3_BUCKET1 : S3_BUCKET2;
+
   const params = {
-    Bucket: S3_BUCKET1,
+    Bucket,
     Key: `${userId}.${type}`, // type is not required
     Body: base64Data,
     ACL: 'public-read',
