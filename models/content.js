@@ -32,6 +32,10 @@ const contentSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  duration: {
+    type: Number,
+    default: 0,
+  },
   fileUrl: {
     type: String,
     default: [],
