@@ -15,16 +15,22 @@ import NewCoach from '../../models/newCoach';
  * @access   Public
  *
  */
-router.get('/content/:searchTerm', async (req, res, next) => {
+router.get('/coach/:searchTerm', async (req, res, next) => {
+  let coaches;
   try {
-    const result = await Content.find({
-      title: {
-        $regex: req.params.searchTerm,
-        $options: 'i',
-      },
-    });
-    console.log(result, 'Search result');
-    res.json(result);
+    if (req.params.searchTerm === 'all') {
+      coaches = await NewCoach.find().lean();
+    } else {
+      coaches = await NewCoach.find({
+        expertiseArea: {
+          $elemMatch: {
+            label: { $regex: req.params.searchTerm, $options: 'i' },
+          },
+        },
+      });
+    }
+    console.log(coaches.length, 'Search coaches');
+    res.json(coaches);
   } catch (e) {
     console.error(e);
     next(e);
