@@ -247,10 +247,13 @@ router.post('/request-coach', auth, imageUpload, async (req, res) => {
         .status(400)
         .json({ success: false, message: 'Fail to send Email' });
     const newCoach = new NewCoach(req.body);
-    await NewCoach.findByIdAndUpdate(newCoach._id, {
-      $push: { fileUrl: req.location },
-    });
+
     newCoach.token = token;
+    newCoach.fileUrl = req.location;
+    // await NewCoach.findByIdAndUpdate(newCoach._id, {
+    //   $push: { fileUrl: req.location },
+    // });
+
     newCoach.save((err, doc) => {
       if (err) return res.status(400).json({ success: false, err });
     });
