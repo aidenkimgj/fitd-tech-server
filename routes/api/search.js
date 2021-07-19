@@ -41,8 +41,7 @@ router.get('/coach/:searchTerm', async (req, res, next) => {
   try {
     const result = await NewCoach.find({
       expertiseArea: {
-        $regex: req.params.searchTerm,
-        $options: 'i',
+        $elemMatch: { label: { $regex: req.params.searchTerm, $options: 'i' } },
       },
     });
     console.log(result, 'Search result');
