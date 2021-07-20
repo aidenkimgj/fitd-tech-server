@@ -4,7 +4,6 @@ import moment from 'moment';
 import '@babel/polyfill';
 import { isNullOrUndefined } from 'util';
 import auth from '../../middleware/auth';
-import imageUpload from '../../middleware/imageUpload';
 
 // Model
 import Content from '../../models/content';

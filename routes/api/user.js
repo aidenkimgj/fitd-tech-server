@@ -179,7 +179,6 @@ router.post('/forgot', async (req, res) => {
       });
     }
 
-    console.log('user: ', user);
     //Send Email
     user.sendEmail('forgot', (err, result, token) => {
       user.tokenExp = moment().add(1, 'hour').valueOf(); //expired time 1 hour
@@ -208,24 +207,25 @@ router.post('/resetpw', auth, async (req, res) => {
 //Receive: UserID, Return - updated user info
 router.post('/approve-coach', auth, async (req, res) => {
   //Admin authenticate
-  let user = req.user;
-  if (user.role !== 2)
+  if (req.user.role !== 2)
     res.status(400).json({ error: true, message: 'Unauthorized' });
   let _id = req.body._id;
-
-  //Updte
-  User.findByIdAndUpdate(
-    _id,
-    { $set: { role: 1 } },
-    { new: true },
-    function (err, user) {
-      if (err)
-        return res
-          .status(400)
-          .json({ error: true, message: "User doesn't exist." });
-      res.status(200).json({ success: true, user: user });
-    }
-  );
+  //Find the application
+  NewCoach.find({ user: _id }, function (err, app) {
+    //Put the application to the new coach
+    User.findByIdAndUpdate(
+      _id,
+      { $set: { role: 1, coach: app } },
+      { new: true },
+      function (err, user) {
+        if (err)
+          return res
+            .status(400)
+            .json({ error: true, message: "User doesn't exist." });
+        res.status(200).json({ success: true, user: user });
+      }
+    );
+  })
 });
 
 // return authenticated url from s3.
