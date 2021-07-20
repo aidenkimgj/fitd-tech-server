@@ -40,7 +40,7 @@ router.get('/', async (req, res) => {
  *
  */
 
-router.post('/', auth, imageUpload, async (req, res, next) => {
+router.post('/', auth, async (req, res, next) => {
   try {
     const {
       title,
@@ -51,6 +51,7 @@ router.post('/', auth, imageUpload, async (req, res, next) => {
       typeSelected,
       contentPrice,
       category,
+      uploadFile
     } = req.body;
 
     const newContent = await Content.create({
@@ -60,7 +61,7 @@ router.post('/', auth, imageUpload, async (req, res, next) => {
       via: viaSelected,
       type: typeSelected,
       price: contentPrice,
-      fileUrl: req.location,
+      fileUrl: uploadFile,
       duration,
       creator: req.user.id,
       date: moment().format('MM-DD-YYYY hh:mm:ss'),

@@ -18,15 +18,14 @@ import NewCoach from '../../models/newCoach';
 router.get('/coach/:searchTerm', async (req, res, next) => {
   let coaches;
   try {
-    if (req.params.searchTerm === 'all') {
+    if (req.params.searchTerm === "all") {
       coaches = await NewCoach.find().lean();
     } else {
       coaches = await NewCoach.find({
         expertiseArea: {
-          $elemMatch: {
-            label: { $regex: req.params.searchTerm, $options: 'i' },
-          },
-        },
+          $elemMatch: { label: { $regex: req.params.searchTerm, $options: 'i' } },
+
+        }
       });
     }
     console.log(coaches.length, 'Search coaches');

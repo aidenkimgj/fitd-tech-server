@@ -6,7 +6,8 @@ import { OAuth2Client } from 'google-auth-library';
 import User from '../../models/user';
 import NewCoach from '../../models/newCoach';
 import moment from 'moment';
-import imageUpload from '../../middleware/imageUpload';
+import { generateUploadURL } from '../../middleware/s3';
+
 
 // import Product from '../../models/product';
 // import Payment from '../../models/payment';
@@ -227,9 +228,16 @@ router.post('/approve-coach', auth, async (req, res) => {
   );
 });
 
+// return authenticated url from s3.
+router.get('/s3Url/:filename', async (req, res) => {
+  const filename = req.params.filename;
+  const url = await generateUploadURL(filename);
+  res.send({ url })
+});
+
 //Request elevation user to coatch (change the user's role to 3(pending request))
 //Return - success: true, new userinfo
-router.post('/request-coach', auth, imageUpload, async (req, res) => {
+router.post('/request-coach', auth, async (req, res) => {
   //Check you are user
   let user = req.user;
   if (user.role !== 0)
@@ -249,10 +257,7 @@ router.post('/request-coach', auth, imageUpload, async (req, res) => {
     const newCoach = new NewCoach(req.body);
 
     newCoach.token = token;
-    newCoach.fileUrl = req.location;
-    // await NewCoach.findByIdAndUpdate(newCoach._id, {
-    //   $push: { fileUrl: req.location },
-    // });
+    newCoach.fileUrl = req.body.uploadFile;
 
     newCoach.save((err, doc) => {
       if (err) return res.status(400).json({ success: false, err });
