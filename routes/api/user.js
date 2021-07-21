@@ -319,7 +319,7 @@ router.post('/userlist', auth, async (req, res) => {
       break;
     }
     case 'general': {
-      const users = await User.find({ role: 1 }).lean();
+      const users = await User.find({ role: 0 }).lean();
       if (!users) return res.status(400).json({ success: false, err });
       return res.status(200).json({
         success: true,
@@ -336,7 +336,7 @@ router.post('/userlist', auth, async (req, res) => {
       break;
     }
     case 'coach': {
-      const users = await User.find({ role: 2 }).lean();
+      const users = await User.find({ role: 1 }).lean();
       if (!users) return res.status(400).json({ success: false, err });
       return res.status(200).json({
         success: true,
