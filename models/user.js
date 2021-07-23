@@ -63,6 +63,11 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: moment().format('MM-DD-YYYY hh:mm:ss'),
   },
+  //default:0, starter:1, Gold:2, Diamond:3
+  isMembership: {
+    type: Number,
+    default: 0
+  },
   reviews: [
     // For delete with a comment which it locates underneath the post
     {

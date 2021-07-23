@@ -62,6 +62,10 @@ const newCoachSchema = new mongoose.Schema(
     token: {
       type: String,
     },
+    events: {
+      type: Array,
+      default: [],
+    }
   },
   { timestamps: true }
 );
