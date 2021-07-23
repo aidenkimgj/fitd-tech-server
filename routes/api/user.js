@@ -364,15 +364,38 @@ router.post('/userlist', auth, async (req, res) => {
   }
 });
 
-
 router.get('/coachlist', async (req, res) => {
   const users = await User.find({ role: 1 }).lean();
   if (!users) return res.status(400).json({ success: false, err });
   return res.status(200).json({
     success: true,
-    users: users.coach,
+    users: users,
   });
 })
 
+router.delete('/deleteuser/:id', auth, async (req, res) => {
+  //Admin authenticate
+  let user = req.user;
+  if (user.role !== 2)
+    res.status(400).json({ error: true, message: 'Unauthorized' });
+
+  const _id = req.params.id;
+  User.findOneAndDelete({ _id: _id }, (err, doc) => {
+    if (err) return res.status(400).json({ success: false, err });
+    if (doc) {
+      return res.status(200).json({
+        success: true,
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'cannot find the user',
+      });
+    }
+
+  })
+})
+
+//payment user APIs
 
 export default router;
