@@ -3,29 +3,34 @@ const router = express.Router();
 
 import Content from '../../models/content';
 import NewCoach from '../../models/newCoach';
-
+import User from '../../models/user';
 //========================================
 //         Search Api
 // Author: Aiden Kim, Donghyun(Dean) Kim
 //========================================
 
 /*
- * @route    GET api/search/content:searchTerm
- * @desc     search name retrive
+ * @route    GET api/search/coach:searchTerm
+ * @desc     search name retrive (coach)
  * @access   Public
  *
  */
 router.get('/coach/:searchTerm', async (req, res, next) => {
   let coaches;
   try {
-    if (req.params.searchTerm === "all") {
-      coaches = await NewCoach.find().lean();
+    if (req.params.searchTerm === 'all') {
+      coaches = await User.find().where('coach').size(1).lean();
     } else {
-      coaches = await NewCoach.find({
-        expertiseArea: {
-          $elemMatch: { label: { $regex: req.params.searchTerm, $options: 'i' } },
-
-        }
+      coaches = await User.find({
+        coach: {
+          $elemMatch: {
+            expertiseArea: {
+              $elemMatch: {
+                label: { $regex: req.params.searchTerm, $options: 'i' },
+              },
+            },
+          },
+        },
       });
     }
     console.log(coaches.length, 'Search coaches');
@@ -38,15 +43,16 @@ router.get('/coach/:searchTerm', async (req, res, next) => {
 
 /*
  * @route    GET api/search/content:searchTerm
- * @desc     search name retrive
+ * @desc     search name retrive (Content)
  * @access   Public
  *
  */
-router.get('/coach/:searchTerm', async (req, res, next) => {
+router.get('/content/:searchTerm', async (req, res, next) => {
   try {
-    const result = await NewCoach.find({
-      expertiseArea: {
-        $elemMatch: { label: { $regex: req.params.searchTerm, $options: 'i' } },
+    const result = await Content.find({
+      title: {
+        $regex: req.params.searchTerm,
+        $options: 'i',
       },
     });
     console.log(result, 'Search result');
