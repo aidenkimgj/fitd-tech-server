@@ -65,7 +65,11 @@ const newCoachSchema = new mongoose.Schema(
     events: {
       type: Array,
       default: [],
-    }
+    },
+    isApproved: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
