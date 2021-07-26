@@ -38,6 +38,7 @@ router.get('/auth', auth, (req, res) => {
         image: req.user.image,
         cart: req.user.cart,
         history: req.user.history,
+        isMembership: req.user.isMembership,
       });
   });
 });
@@ -209,6 +210,7 @@ router.post('/approve-coach', auth, async (req, res) => {
   if (req.user.role !== 2)
     res.status(400).json({ error: true, message: 'Unauthorized' });
   let _id = req.body._id;
+  console.log('id값', _id);
   //Find the application
 
   try {
