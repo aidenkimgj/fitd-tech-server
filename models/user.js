@@ -68,12 +68,24 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  reviews: [
+  contentReviews: [
     // For delete with a comment which it locates underneath the post
     {
       content_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Content',
+      },
+      review_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Review',
+      },
+    },
+  ],
+  coachReviews: [
+    {
+      coach_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'NewCoach',
       },
       review_id: {
         type: mongoose.Schema.Types.ObjectId,
