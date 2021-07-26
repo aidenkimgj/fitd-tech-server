@@ -14,6 +14,7 @@ import contentRoutes from './routes/api/content';
 import reviewRoutes from './routes/api/review';
 import searchRoutes from './routes/api/search';
 import categoryRoutes from './routes/api/category';
+import paymentRoutes from './routes/api/payment';
 
 //=================================
 //            App
@@ -48,5 +49,6 @@ app.use('/api/content', contentRoutes);
 app.use('/api/review', reviewRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/category', categoryRoutes);
+app.use('/api/payment', paymentRoutes);
 
 export default app;
