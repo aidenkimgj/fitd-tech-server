@@ -19,8 +19,8 @@ import User from '../../models/user';
  * @access    Public
  *
  */
-router.get('/coach-reviews', async (req, res) => {
-  const { coachId } = req.body;
+router.get('/:id/coach-reviews', async (req, res) => {
+  const { coachId } = req.params.id;
   try {
     const review = await NewCoach.findById({ coachId }).populate('reviews');
 
@@ -81,9 +81,7 @@ router.post('/coach-review', async (req, res, next) => {
  */
 router.get('/:id/reviews', async (req, res) => {
   try {
-    const review = await Content.findById({ path: req.params.id }).populate(
-      'reviews'
-    );
+    const review = await Content.findById(req.params.id).populate('reviews');
 
     console.log(review, 'review load');
     res.json(review);
