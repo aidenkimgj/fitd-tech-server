@@ -19,6 +19,10 @@ const reviewSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Content',
   },
+  coach: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'NewCoach',
+  },
   creator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
