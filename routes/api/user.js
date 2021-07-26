@@ -8,7 +8,6 @@ import NewCoach from '../../models/newCoach';
 import moment from 'moment';
 import { generateUploadURL } from '../../middleware/s3';
 
-
 // import Product from '../../models/product';
 // import Payment from '../../models/payment';
 
@@ -211,28 +210,49 @@ router.post('/approve-coach', auth, async (req, res) => {
     res.status(400).json({ error: true, message: 'Unauthorized' });
   let _id = req.body._id;
   //Find the application
-  NewCoach.find({ user: _id }, function (err, app) {
-    //Put the application to the new coach
-    User.findByIdAndUpdate(
+
+  try {
+    const modified_user = await User.findByIdAndUpdate(
       _id,
-      { $set: { role: 1, coach: app } },
-      { new: true },
-      function (err, user) {
-        if (err)
-          return res
-            .status(400)
-            .json({ error: true, message: "User doesn't exist." });
-        res.status(200).json({ success: true, user: user });
-      }
+      { role: 1 },
+      { new: true }
     );
-  })
+
+    const coach = await NewCoach.findOne({ user: _id });
+
+    await NewCoach.findByIdAndUpdate(
+      coach._id,
+      { isApproved: true },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true, user: modified_user });
+  } catch (e) {
+    res.status(400).json({ error: true, message: "User doesn't exist." });
+  }
+
+  // NewCoach.find({ user: _id }, function (err, app) {
+  //   //Put the application to the new coach
+  //   User.findByIdAndUpdate(
+  //     _id,
+  //     { $set: { role: 1, coach: app } },
+  //     { new: true },
+  //     function (err, user) {
+  //       if (err)
+  //         return res
+  //           .status(400)
+  //           .json({ error: true, message: "User doesn't exist." });
+  //       res.status(200).json({ success: true, user: user });
+  //     }
+  //   );
+  // })
 });
 
 // return authenticated url from s3.
 router.get('/s3Url/:filename', async (req, res) => {
   const filename = req.params.filename;
   const url = await generateUploadURL(filename);
-  res.send({ url })
+  res.send({ url });
 });
 
 //Request elevation user to coatch (change the user's role to 3(pending request))
@@ -371,7 +391,7 @@ router.get('/coachlist', async (req, res) => {
     success: true,
     users: users,
   });
-})
+});
 
 router.delete('/deleteuser/:id', auth, async (req, res) => {
   //Admin authenticate
@@ -392,9 +412,8 @@ router.delete('/deleteuser/:id', auth, async (req, res) => {
         message: 'cannot find the user',
       });
     }
-
-  })
-})
+  });
+});
 
 //payment user APIs
 
