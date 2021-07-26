@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import { google } from 'googleapis';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
-import { forgot, newCoach } from '../form/email.form'
+import { forgot, newCoach } from '../form/email.form';
 const saltRounds = 10;
 
 //=================================
@@ -66,7 +66,7 @@ const userSchema = new mongoose.Schema({
   //default:0, starter:1, Gold:2, Diamond:3
   isMembership: {
     type: Number,
-    default: 0
+    default: 0,
   },
   reviews: [
     // For delete with a comment which it locates underneath the post
@@ -87,10 +87,10 @@ const userSchema = new mongoose.Schema({
       ref: 'Content',
     },
   ],
-  coach: {
-    type: Array,
-    default: [],
-  }
+  // coach: {
+  //   type: Array,
+  //   default: [],
+  // }
 });
 
 //=================================
@@ -177,12 +177,15 @@ userSchema.statics.findByToken = function (data, cb) {
 
 userSchema.methods.sendEmail = async function (type, cb) {
   let user = this;
-  //if email exists, request refreshToken to access google OAuth   
+  //if email exists, request refreshToken to access google OAuth
   const oAuth2Client = new google.auth.OAuth2(
     process.env.FORGOT_OAUTH_EMAIL_CLIENT_ID,
     process.env.FORGOT_OAUTH_EMAIL_SECRET,
-    process.env.FORGOT_OAUTH_REDIRECT_URI)
-  oAuth2Client.setCredentials({ refresh_token: process.env.FORGOT_OAUTH_EMAIL_REFRESH_TOKEN })
+    process.env.FORGOT_OAUTH_REDIRECT_URI
+  );
+  oAuth2Client.setCredentials({
+    refresh_token: process.env.FORGOT_OAUTH_EMAIL_REFRESH_TOKEN,
+  });
 
   // Generate Token to access the page to reset password
   const token = crypto.randomBytes(20).toString('hex');
@@ -195,13 +198,13 @@ userSchema.methods.sendEmail = async function (type, cb) {
       port: 465,
       secure: true, // true for 465, false for other ports
       auth: {
-        type: "OAuth2",
+        type: 'OAuth2',
         user: process.env.WEBSITE_EMAIL_ADDRESS,
         clientId: process.env.FORGOT_OAUTH_EMAIL_CLIENT_ID,
         clientSecret: process.env.FORGOT_OAUTH_EMAIL_SECRET,
         refreshToken: process.env.FORGOT_OAUTH_EMAIL_REFRESH_TOKEN,
-        accessToken: accessToken
-      }
+        accessToken: accessToken,
+      },
     });
     //Main contents
     let mailOptions;
@@ -214,7 +217,7 @@ userSchema.methods.sendEmail = async function (type, cb) {
   } catch (err) {
     return cb(err, null, null);
   }
-}
+};
 
 const User = mongoose.model('User', userSchema);
 
