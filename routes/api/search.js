@@ -3,7 +3,7 @@ const router = express.Router();
 
 import Content from '../../models/content';
 import NewCoach from '../../models/newCoach';
-import User from '../../models/user';
+
 //========================================
 //         Search Api
 // Author: Aiden Kim, Donghyun(Dean) Kim
@@ -19,18 +19,15 @@ router.get('/coach/:searchTerm', async (req, res, next) => {
   let coaches;
   try {
     if (req.params.searchTerm === 'all') {
-      coaches = await User.find().where('coach').size(1).lean();
+      coaches = await NewCoach.find({ isApproved: true }).lean();
     } else {
-      coaches = await User.find({
-        coach: {
+      coaches = await NewCoach.find({
+        expertiseArea: {
           $elemMatch: {
-            expertiseArea: {
-              $elemMatch: {
-                label: { $regex: req.params.searchTerm, $options: 'i' },
-              },
-            },
+            label: { $regex: req.params.searchTerm, $options: 'i' },
           },
         },
+        isApproved: true,
       });
     }
     console.log(coaches.length, 'Search coaches');
