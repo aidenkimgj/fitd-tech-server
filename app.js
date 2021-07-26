@@ -15,7 +15,7 @@ import reviewRoutes from './routes/api/review';
 import searchRoutes from './routes/api/search';
 import categoryRoutes from './routes/api/category';
 import paymentRoutes from './routes/api/payment';
-
+import http from "http";
 //=================================
 //            App
 //Author: Aiden Kim, Donghyun(Dean) Kim
@@ -26,9 +26,14 @@ app.use(cookieParser());
 const { MONGO_URI } = config;
 app.use(hpp());
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({ origin: true, credentials: true, preFlightContinue: true }));
+app.use(cors({ origin: '', credentials: true, preFlightContinue: true }));
 app.use(morgan('dev'));
 app.use(express.json());
+
+// Heroku sleep escaper
+setInterval(function () {
+  http.get("https://fitd-app.herokuapp.com/");
+}, 600000);
 
 //Connect MongoDB
 mongoose
