@@ -20,9 +20,8 @@ import User from '../../models/user';
  *
  */
 router.get('/:id/coach-reviews', async (req, res) => {
-  const { coachId } = req.params.id;
   try {
-    const review = await NewCoach.findById({ coachId }).populate('reviews');
+    const review = await NewCoach.findById(req.params.id).populate('reviews');
 
     console.log(review, 'review load');
     res.json(review);
