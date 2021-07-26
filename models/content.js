@@ -38,7 +38,6 @@ const contentSchema = new mongoose.Schema({
   },
   fileUrl: {
     type: String,
-    default: [],
   },
   views: {
     type: Number,
