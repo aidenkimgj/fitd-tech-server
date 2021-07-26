@@ -70,6 +70,12 @@ const newCoachSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Review',
+      },
+    ],
   },
   { timestamps: true }
 );
