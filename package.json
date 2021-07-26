@@ -35,7 +35,8 @@
     "nodemailer": "^6.6.1",
     "path": "^0.12.7",
     "react-google-login": "^5.2.2",
-    "stripe": "^8.165.0"
+    "stripe": "^8.165.0",
+    "babel-watch": "^7.4.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.3",
@@ -44,7 +45,7 @@
     "@babel/plugin-transform-runtime": "^7.14.3",
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.14.4",
-    "babel-watch": "^7.4.1",
+
     "morgan": "^1.10.0"
   }
 }
