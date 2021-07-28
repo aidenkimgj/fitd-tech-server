@@ -1,7 +1,13 @@
 import express from 'express';
+import auth from '../../middleware/auth';
 const router = express.Router();
 import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_TEST);
+
+//Model
+
+import User from '../../models/user';
+
 //========================================
 //         Payment Api
 // Author: Aiden Kim, Donghyun(Dean) Kim
@@ -14,9 +20,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_TEST);
  *
  */
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   console.log(`+++++Payment req.body`, req.body);
-  let { amount, id } = req.body;
+  let { amount, id, membershipId } = req.body;
+  const user = req.user;
   let intAmount = parseInt(amount);
   try {
     const payment = await stripe.paymentIntents.create({
@@ -27,9 +34,17 @@ router.post('/', async (req, res) => {
       confirm: true,
     });
     console.log('Payment', payment);
+
+    const paidUser = await User.findByIdAndUpdate(
+      user._id,
+      { isMembership: membershipId },
+      { new: true }
+    );
+
     res.json({
       message: 'Payment successful',
       success: true,
+      user: paidUser,
     });
   } catch (error) {
     console.log('Error', error);
