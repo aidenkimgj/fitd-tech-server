@@ -39,6 +39,7 @@ router.get('/auth', auth, (req, res) => {
         cart: req.user.cart,
         history: req.user.history,
         isMembership: req.user.isMembership,
+        events: req.user.events,
       });
   });
 });
@@ -298,7 +299,7 @@ router.post('/request-coach', auth, async (req, res) => {
 router.post('/getApplication', auth, async (req, res) => {
   //Check Authorization
   let user = req.user;
-  if (user.role !== 2)
+  if (user.role !== 2 && user.role !== 1)
     res.status(400).json({ error: true, message: 'Unauthorized' });
   const allApp = await NewCoach.find().lean();
   res.status(200).json({ success: true, app: allApp });
