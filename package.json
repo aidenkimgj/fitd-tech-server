@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "babel-watch server.js",
-    "start": "babel-watch server.js"
+    "build": "babel "
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,6 @@
   "bugs": {
     "url": "https://github.com/aidenkimgj/fitd-tech-server/issues"
   },
-  "homepage": "https://github.com/aidenkimgj/fitd-tech-server#readme",
   "dependencies": {
     "aws-sdk": "^2.922.0",
     "bcrypt": "^5.0.1",
@@ -35,14 +34,16 @@
     "nodemailer": "^6.6.1",
     "path": "^0.12.7",
     "react-google-login": "^5.2.2",
-    "stripe": "^8.165.0",
-    "babel-watch": "^7.4.1",
+    "stripe": "^8.165.0"
+  },
+  "devDependencies": {
     "@babel/cli": "^7.14.3",
     "@babel/core": "^7.14.3",
     "@babel/node": "^7.14.2",
     "@babel/plugin-transform-runtime": "^7.14.3",
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.14.4",
+    "babel-watch": "^7.4.1",
     "morgan": "^1.10.0"
   }
 }

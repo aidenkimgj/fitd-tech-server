@@ -417,6 +417,4 @@ router.delete('/deleteuser/:id', auth, async (req, res) => {
   });
 });
 
-//payment user APIs
-
 export default router;

@@ -99,10 +99,10 @@ const userSchema = new mongoose.Schema({
       ref: 'Content',
     },
   ],
-  // coach: {
-  //   type: Array,
-  //   default: [],
-  // }
+  events: {
+    type: Array,
+    default: [],
+  },
 });
 
 //=================================

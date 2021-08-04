@@ -15,7 +15,8 @@ import reviewRoutes from './routes/api/review';
 import searchRoutes from './routes/api/search';
 import categoryRoutes from './routes/api/category';
 import paymentRoutes from './routes/api/payment';
-import http from 'http';
+import scheduleRoutes from './routes/api/schedule';
+
 //=================================
 //            App
 //Author: Aiden Kim, Donghyun(Dean) Kim
@@ -50,5 +51,6 @@ app.use('/api/review', reviewRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/schedule', scheduleRoutes);
 
 export default app;
