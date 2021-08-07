@@ -53,4 +53,18 @@ app.use('/api/category', categoryRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/schedule', scheduleRoutes);
 
+// Serve static assets if in production
+if (process.env.NODE_ENV == 'production') {
+  // Set static folder
+  // All the javascript and css files will be read and served from this folder
+  app.use(express.static(path.join(__dirname, '../fitd-tech-client/build')));
+
+  // index.html for all page routes    html or routing and naviagtion
+  app.get('*', (req, res) => {
+    res.sendFile(
+      path.resolve(__dirname, '../fitd-tech-client', 'build', 'index.html')
+    );
+  });
+}
+
 export default app;
