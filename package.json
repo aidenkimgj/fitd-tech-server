@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "babel-watch server.js",
-    "build": "babel "
+    "dev": "babel-watch fitd-tech-server/server.js",
+    "build": "babel fitd-tech-server --out-dir build "
   },
   "repository": {
     "type": "git",
