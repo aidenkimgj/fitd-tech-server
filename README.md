@@ -1,4 +1,4 @@
-# FITD Web App
+# FITD Web Sever
 
 Please take a look [live Web App](https://fitd.ca).
 
