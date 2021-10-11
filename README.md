@@ -1,4 +1,4 @@
-# FITD Sever
+# FITD Server
 
 ## Description
 
